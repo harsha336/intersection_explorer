@@ -1,0 +1,35 @@
+trained_net = false;
+while true
+    if isfile('/tmp/mat_request')
+        fileIID = fopen('/tmp/mat_request','r');
+        formatSpec = '%s';
+        opt = fscanf(fileIID, formatSpec)
+        if trained_net == true
+            old_net = resnet_trained;
+        end
+        [new_net,acc] = resnet_train;
+        cur_dir = sprintf('/tmp/test_images/%s',opt);
+        listing = dir(cur_dir);
+        filename = sprintf('/tmp/test_images/%s/%s',opt,listing(3).name)
+        img = imread(filename);
+        img = imresize(img,[224 224]);
+        if acc < 0.9
+            resnet_trained = old_net;
+            fold = sprintf('/tmp/test_images/%s',opt);
+            place = classify(resnet_trained, img);
+            fileID = fopen('/tmp/mat_response','w');
+            fprintf(fileID,'%d\n%s',2,place);
+            fclose(fileID);
+            rmdir(fold,'s');
+        else
+            resnet_trained = new_net;
+            place = classify(resnet_trained, img);
+            fileID = fopen('/tmp/mat_response','w');
+            fprintf(fileID,'%d\n%s',1,place);
+            fclose(fileID);
+        end
+        trained_net = true;
+        fclose(fileIID);
+        delete '/tmp/mat_request';
+    end
+end

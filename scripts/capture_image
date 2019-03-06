@@ -1,0 +1,11 @@
+#!/bin/bash
+
+`sudo uvccapture -G100 -B100 -x1280 -y720 -v -d/dev/video0`
+ls /tmp/test_images | grep $1
+if [ "$?" -ne "0" ]; then
+	mkdir /tmp/test_images/$1
+fi
+
+echo "Moving to $1"
+file_name="img_$2.jpg"
+mv snap.jpg /tmp/test_images/$1/$file_name

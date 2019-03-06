@@ -1,0 +1,4 @@
+#!/bin/bash
+
+#sudo rm -rf /tmp/mat_request
+sudo rm -rf /tmp/mat_response
