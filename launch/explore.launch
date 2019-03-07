@@ -1,0 +1,7 @@
+<launch>
+	<node name="iexplore" pkg="intersection_explorer" type="iexplore">
+		<param name="odom_frame" type="string" value="/RosAria/pose"/>
+		<param name="scan_topic" type="string" value="scan_filtered"/>
+		<param name="base_link_frame" type="string" value="base_link"/>
+	</node>
+</launch>

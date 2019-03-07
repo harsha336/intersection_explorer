@@ -12,9 +12,9 @@ intersection_explorer::Explorer::Explorer() :
 {
 	ROS_INFO("Explorer::Explorer:: Created the explorer node!");
 
-	nh_private_.param("odom_frame", odom_, std::string("odom"));
+	nh_private_.param("odom_frame", odom_, std::string("/RosAria/pose"));
 	nh_private_.param("scan_topic", scan_topic_, std::string("scan"));
-	nh_private_.param("base_link_frame", base_link_, std::string("chassis"));
+	nh_private_.param("base_link_frame", base_link_, std::string("base_link"));
 
 	angular_speed_ = 0.1;
 	linear_speed_ = 0.5;
@@ -48,7 +48,7 @@ void intersection_explorer::Explorer::scanCallback ( const sensor_msgs::LaserSca
 	float delta_theta = scan->angle_increment;
 	unsigned int zero_theta = scan->ranges.size() / 2;
 
-	unsigned int iterations = (30.0 / 180.0 *M_PI) / delta_theta;
+	unsigned int iterations = (90.0 / 180.0 *M_PI) / delta_theta;
 	unsigned int i = zero_theta - (iterations/2);
 	unsigned int max_i = i + iterations;
 	ROS_DEBUG("Zero theta: %d, iterations: %d, max_i: %d", zero_theta, iterations,
@@ -111,26 +111,26 @@ bool intersection_explorer::Explorer::handleRequest(intersection_explorer::IPlan
 	init_pose.header.frame_id = odom_;*/
     	if( req.shape == STAR )
     	{
-	    	rotate(CW, M_PI/2);
+	    	rotate(CW, M_PI/2, false);
 	    	//rotate(CCW, M_PI/2);
 		ROS_INFO("==========");
 		float trav_dist;
 	    	for(unsigned int i = 0;i< 6;i++)
 	    	{
 			trav_dist = moveStraight(max_move_dist_);
-			rotate(CW, M_PI/2);
-			rotate(CW, M_PI/2);
+			rotate(CW, M_PI/2, false);
+			rotate(CW, M_PI/2, false);
 			moveStraight(trav_dist);
 			//moveToInitPose(init_pose);
-			rotate(CW, M_PI/2);
-			rotate(CW, M_PI/4);
+			rotate(CW, M_PI/2, false);
+			rotate(CW, M_PI/4, false);
 			//moveStraight(max_move_dist_);
 			//moveToInitPose(init_pose);
 			ROS_INFO("===========");
 	    	}
 		trav_dist = moveStraight(max_move_dist_);
-		rotate(CW, M_PI/2);
-		rotate(CW, M_PI/2);
+		rotate(CW, M_PI/2, false);
+		rotate(CW, M_PI/2, false);
 		moveStraight(trav_dist);
 
 		ROS_INFO_STREAM("Images taken are : " << img_count_);
@@ -155,10 +155,10 @@ bool intersection_explorer::Explorer::handleRequest(intersection_explorer::IPlan
     	}
 	else if(req.shape == ROTATE)
 	{
-		rotate(CW, M_PI/2);
-		rotate(CW, M_PI/2);
-		rotate(CW, M_PI/2);
-		rotate(CW, M_PI/2);
+		rotate(CW, M_PI/2, true);
+		rotate(CW, M_PI/2, true);
+		rotate(CW, M_PI/2, true);
+		rotate(CW, M_PI/2, true);
                 ROS_INFO_STREAM("Images taken are : " << img_count_);
                 ROS_INFO("Requesting label of intersection");
                 std::string ret;
@@ -233,7 +233,7 @@ int intersection_explorer::Explorer::createAndWaitStatus(std::string &r)
         return ERR_MSG_UNKNOWN;
 }
 
-void intersection_explorer::Explorer::rotate(int direction, float angle)
+void intersection_explorer::Explorer::rotate(int direction, float angle, bool take_pic)
 {
 	ROS_INFO("intersection_explorer::Explorer::rotate: Direction: %d, Angle: %f",
 			direction, angle);
@@ -276,13 +276,13 @@ void intersection_explorer::Explorer::rotate(int direction, float angle)
 		//cur_ang = angular_speed_ * ( t1 - t0 );
 		ros::spinOnce();
 		
-		if(std::abs(yaw - pic_time) < 0.01)
+		if(std::abs(yaw - pic_time) < 0.01 && take_pic)
 		{
 			ROS_DEBUG(" Taking picture : %d", count);
 			img_count_++;
 			vel_msg.angular.z = 0;
 			vel_pub_.publish(vel_msg);
-			std::string command = "/home/robolab/inter_det_ws/src/intersection_explorer/scripts/capture_image " + inter_type_ + " " + std::to_string(img_count_);
+			std::string command = "/home/ucmrobotics/inter_det_ws/src/intersection_explorer/scripts/capture_image " + inter_type_ + " " + std::to_string(img_count_);
                         system(command.c_str());
 			pic_time = intersection_explorer::WrapPosNegPI(pic_time -
 									interval);
@@ -322,11 +322,11 @@ float intersection_explorer::Explorer::moveStraight(float dist)
 			vel_msg.linear.x = 0;
 			vel_pub_.publish(vel_msg);
 			img_count_++;
-			std::string command = "/home/robolab/inter_det_ws/src/intersection_explorer/scripts/capture_image " + inter_type_ + " " + std::to_string(img_count_);
+			std::string command = "/home/ucmrobotics/inter_det_ws/src/intersection_explorer/scripts/capture_image " + inter_type_ + " " + std::to_string(img_count_);
 			system(command.c_str());
 			pic_time += interval;
 		}
-		if((max_move_dist_ - 0.5) < 0)
+		if((max_move_dist_ - 0.75) < 0)
 			break;
 	}
 
@@ -356,8 +356,8 @@ bool intersection_explorer::Explorer::moveToInitPose(geometry_msgs::Pose goal)
 		ROS_INFO("Curr in base link: (%f,%f),(%f)", cpose_bl.pose.position.x,
 				cpose_bl.pose.position.y,
 				getYawAngle(cpose_bl.pose));
-		rotate(CW, M_PI/2);
-		rotate(CW, M_PI/2);
+		//rotate(CW, M_PI/2);
+		//rotate(CW, M_PI/2);
 		float to_rot = getAngleToGoal(cpose_bl.pose, gpose_bl.pose);
 		float mov_dist = computeDistance(gpose_bl.pose, cpose_bl.pose);
 		ROS_INFO("To rotate: %f, to move straight: %f", to_rot, mov_dist);

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-`sudo uvccapture -G100 -B100 -x1280 -y720 -v -d/dev/video0`
-ls /tmp/test_images | grep $1
+`sudo uvccapture -G100 -B100 -x1280 -y720 -v -d/dev/video1`
+ls /tmp/test_images | grep -w $1
 if [ "$?" -ne "0" ]; then
 	mkdir /tmp/test_images/$1
 fi

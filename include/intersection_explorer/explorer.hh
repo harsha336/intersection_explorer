@@ -71,7 +71,7 @@ class Explorer
 	protected: void clearVelocityMessage(geometry_msgs::Twist &vel_msg);
 	protected: bool moveToInitPose(geometry_msgs::Pose goal);
 	protected: float moveStraight(float dist);
-	protected: void rotate(int direction, float angle);
+	protected: void rotate(int direction, float angle, bool take_pic);
 	protected: int createAndWaitStatus(std::string &r);
 	protected: float computeDistance(geometry_msgs::Pose a, geometry_msgs::Pose b)
 			{

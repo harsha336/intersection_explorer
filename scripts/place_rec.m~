@@ -1,7 +1,7 @@
 trained_net = false;
 while true
     if isfile('/tmp/mat_request')
-        pause(5)
+        
         fileIID = fopen('/tmp/mat_request','r');
         formatSpec = '%s';
         opt = fscanf(fileIID, formatSpec)
@@ -14,7 +14,7 @@ while true
         filename = sprintf('/tmp/test_images/%s/%s',opt,listing(3).name)
         img = imread(filename);
         img = imresize(img,[224 224]);
-        if acc < 0.99
+        if acc < 0.9
             resnet_trained = old_net;
             fold = sprintf('/tmp/test_images/%s',opt);
             place = classify(resnet_trained, img);

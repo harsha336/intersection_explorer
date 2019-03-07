@@ -49,6 +49,6 @@ function [resnet_mod,accuracy] = resnet_train
     [resnet_mod,info] = trainNetwork(traImgs, lgraph, options);
     testpreds = classify(resnet_mod,teImgs);
     accuracy = nnz(testpreds == teImgs.Labels)/numel(testpreds)
-    %[placeconf,placenames] = confusionmat(teImgs.Labels,testpreds);
-    %heatmap(placenames,placenames,placeconf);
+    [placeconf,placenames] = confusionmat(teImgs.Labels,testpreds);
+    heatmap(placenames,placenames,placeconf);
 end
